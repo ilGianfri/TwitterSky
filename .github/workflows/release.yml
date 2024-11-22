@@ -44,15 +44,19 @@ jobs:
       run: dotnet build --configuration Release
       working-directory: src
 
-    - name: Publish
-      run: dotnet publish TwitterSky\TwitterSky.csproj --configuration Release --no-restore --output ./publish
+    - name: Publish win-x64
+      run: dotnet publish TwitterSky\TwitterSky.csproj --configuration Release -r win-x64 --no-restore --output ./win-x64
       working-directory: src
 
-    - name: Create release directory
-      run: mkdir -p release
+    - name: Create Release Packages zip
+      run: Compress-Archive -Path src\win-x64\* -DestinationPath release/TwitterSky_win-x64_${{ steps.compute_tag.outputs.next_tag }}.zip
+
+    - name: Publish arm-x64
+      run: dotnet publish TwitterSky\TwitterSky.csproj --configuration Release -r win-arm64 --no-restore --output ./win-arm64
+      working-directory: src
 
     - name: Create Release Packages zip
-      run: Compress-Archive -Path src\publish\* -DestinationPath release/TwitterSky_${{ steps.compute_tag.outputs.next_tag }}.zip
+      run: Compress-Archive -Path src\win-arm64\* -DestinationPath release/TwitterSky_win-arm64_${{ steps.compute_tag.outputs.next_tag }}.zip
 
     - name: Upload release assets
       uses: softprops/action-gh-release@v2
