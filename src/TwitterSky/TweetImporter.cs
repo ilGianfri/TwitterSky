@@ -4,18 +4,19 @@ using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
 using TwitterSky.Models;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace TwitterSky
 {
-    public class TweetImporter
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TweetImporter"/> class.
+    /// </summary>
+    /// <param name="options">The options for importing tweets.</param>
+    public class TweetImporter(Options options)
     {
-        private readonly Options options;
         private List<TweetArchiveModel>? _tweetArchive;
         private string _lastParsedTweetId = string.Empty;
-        private CancellationTokenSource _cts = new ();
+        private readonly CancellationTokenSource _cts = new ();
         private List<string> _twitterHandles = [];
 
         private readonly ATProtocol _bskyProtocol = new ATProtocolBuilder()
@@ -39,15 +40,6 @@ namespace TwitterSky
         /// Dictionary to map tweet ids to bsky ids (for replies threads)
         /// </summary>
         private readonly Dictionary<string, CreatePostResponse?> _tweetIdToBskyId = [];
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TweetImporter"/> class.
-        /// </summary>
-        /// <param name="options">The options for importing tweets.</param>
-        public TweetImporter(Options options)
-        {
-            this.options = options;
-        }
 
         /// <summary>
         /// Parses the JSON file containing the tweet archive.
@@ -161,7 +153,7 @@ namespace TwitterSky
         /// <param name="tweetContent">The content of the tweet.</param>
         /// <param name="urls">The list of URLs to replace.</param>
         /// <returns>A tuple containing the updated tweet content and the list of facets.</returns>
-        private (string, List<Facet>) ReplaceUrls(string tweetContent, List<Url> urls)
+        private static (string, List<Facet>) ReplaceUrls(string tweetContent, List<Url> urls)
         {
             List<Facet> facets = [];
             if (urls.Count > 0)
@@ -184,6 +176,9 @@ namespace TwitterSky
             return (tweetContent, facets);
         }
 
+        /// <summary>
+        /// Requests the cancellation of the import operation.
+        /// </summary>
         public void CancelImport()
         {
             _cts.Cancel();
@@ -243,10 +238,10 @@ namespace TwitterSky
 
                 CreatePostResponse? parentPostId = null;
                 // Check if the tweet is a reply to another post from the same user
-                if (!string.IsNullOrEmpty(tweet.Tweet.InReplyToStatusId) && _tweetIdToBskyId.ContainsKey(tweet.Tweet.InReplyToStatusId))
+                if (!string.IsNullOrEmpty(tweet.Tweet.InReplyToStatusId) && _tweetIdToBskyId.TryGetValue(tweet.Tweet.InReplyToStatusId, out CreatePostResponse? value))
                 {
                     // If the tweet is a reply to another tweet in the archive, we need to add the reply to the thread
-                    parentPostId = _tweetIdToBskyId[tweet.Tweet.InReplyToStatusId];
+                    parentPostId = value;
                 }
 
                 await PostToBskyAsync(tweet.Tweet.Id, content, imageUrls, DateTime.ParseExact(tweet.Tweet.CreatedAt, TW_DATE_FORMAT, CultureInfo.InvariantCulture), facets, parentPostId);
