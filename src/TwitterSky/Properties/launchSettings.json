@@ -2,7 +2,7 @@
   "profiles": {
     "TwitterSky": {
       "commandName": "Project",
-      "commandLineArgs": "--archivePath \"C:\\Users\\aless\\Downloads\\twitter-2024-11-19-ef9e06e07da4cdded07ceab9efc549a2b27372edd2b27b36fefdc22c23290133-ilgianfri\\data\\tweets.js\" --username \"ilgianfri.bsky.social\" --password \"7b4p-2tj2-pw35-fhvj\" --twitterHandles \"ilGianfri\" --minDate \"2012-10-03\""
+      "commandLineArgs": "--archivePath \"C:\\Users\\aless\\Downloads\\twitter-2024-11-19-ef9e06e07da4cdded07ceab9efc549a2b27372edd2b27b36fefdc22c23290133-ilgianfri\\data\\tweets.js\" --username \"ilgianfri.bsky.social\" --password \"7b4p-2tj2-pw35-fhvj\" --twitterHandles \"ilGianfri\" --minDate \"2012-10-10\""
     }
   }
 }

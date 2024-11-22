@@ -13,7 +13,7 @@ public class Options
     [Option("maxDate", Required = false, HelpText = "Only import tweets posted before this date. Format YYYY-MM-DD")]
     public string? MaxDate { get; set; }
 
-    [Option("importReplies", Required = false, HelpText = "Import replies", Hidden = true)]
+    [Option("importReplies", Required = false, HelpText = "Import replies. If false, threads will still be imported", Hidden = true)]
     public bool ImportReplies { get; set; }
 
     [Option("skipSensitive", Required = false, HelpText = "Skip tweets marked as sensitive")]
