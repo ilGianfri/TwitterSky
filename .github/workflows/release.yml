@@ -52,17 +52,16 @@ jobs:
       run: mkdir -p release
 
     - name: Create Release Packages zip
-      run: Compress-Archive -Path src\publish -DestinationPath release/publish.zip
+      run: Compress-Archive -Path src\publish\* -DestinationPath release/TwitterSky_${{ steps.compute_tag.outputs.next_tag }}.zip
 
     - name: Upload release assets
       uses: softprops/action-gh-release@v2
       with:
-        body: ${{ steps.extract_commands.outputs.commands }}
         files: release/*.zip
         tag_name: ${{ steps.compute_tag.outputs.next_tag }}
         prerelease: false
         generate_release_notes: true
-        name: TwitterSky ${{ steps.compute_tag.outputs.next_tag }}.0
+        name: TwitterSky ${{ steps.compute_tag.outputs.next_tag }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
