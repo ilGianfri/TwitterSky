@@ -29,14 +29,6 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         version_type: patch
 
-    # Remove the starting v from the tag with a powershell script and store it in an output
-    - name: Remove v from tag
-      id: remove_v
-      run: |
-        $tag = "${{ steps.compute_tag.outputs.next_tag }}"
-        $tag = $tag -replace '^v', ''
-        echo "::set-output name=next_tag::$tag"
-
     # Install the .NET SDK workload
     - name: Install .NET
       uses: actions/setup-dotnet@v4
