@@ -430,6 +430,14 @@ namespace TwitterSky
                            async error =>
                            {
                                _cmd.PrintError($"{error.StatusCode} {error.Detail}");
+
+                               if (error.StatusCode == 429)
+                               {
+                                   await HandleRateLimit();
+
+                                   // Retry the post
+                                   await PostToBskyAsync(tweetId, textContent, imageUrls, createdAt, facets, inReplyTo);
+                               }
                            }
                     );
 
