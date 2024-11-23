@@ -497,8 +497,8 @@ namespace TwitterSky
             // Absolutely untested code, it won't consider if the user uses the account from other places while importing
             // It will just wait 15 minutes if the limit is reached but I don't think it's enough
 
-            _cmd.PrintWarning("Rate limit reached. Sleeping for 60 minutes...");
-            await Task.Delay(TimeSpan.FromMinutes(60));
+            _cmd.PrintWarning("Rate limit reached. Sleeping for 15 minutes...");
+            await Task.Delay(TimeSpan.FromMinutes(15));
 
             _postedTweets = 0;
 
