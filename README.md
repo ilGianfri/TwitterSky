@@ -24,13 +24,14 @@ This comes with **absolutely no warranty**.
 1. Download your Twitter archive from https://twitter.com/settings/your_twitter_data
 2. Extract the archive
 3. Create an app password from your [BlueSky settings](https://bsky.app/settings/app-passwords)
-4. Run TwitterSky from the terminal with the parameters below
+4. Download and extract the TwitterSky archive
+5. Run TwitterSky from the terminal with the parameters below
 
 # Parameters
 
 | Parameter       | Required | Description                                                                 | Default |
 |-----------------|----------|-----------------------------------------------------------------------------|---------|
-| `archivePath`   | Yes      | Path to the tweet.js file from Twitter archive.                             |        |
+| `archivePath`   | Yes      | Path to the tweet.js file from Twitter archive.                             |         |
 | `minDate`       | No       | Only import tweets posted after this date. Format YYYY-MM-DD.               |         |
 | `maxDate`       | No       | Only import tweets posted before this date. Format YYYY-MM-DD.              |         |
 | `importReplies` | No       | Import replies. If false, threads will still be imported.                   | False   |
@@ -60,7 +61,7 @@ FishyFlip nuget package for the BlueSky API implementation. https://github.com/d
 | Why do I need to provide my Twitter handles? | TwitterSky uses them to figure out which tweets are replies to other users and which ones are part of a thread you posted. |
 | Are posts imported with the original date? | Yes, TwitterSky uses the original tweet date from the archive. We pass the date to BlueSky, they decide how to handle it. As of now, BlueSky imports them with the original date but shows an "Archived" label on the post. |
 
-## Example of an imported tweet displaying a warning in BlueSky
+### Example of an imported tweet displaying a warning in BlueSky
 ![image](https://github.com/user-attachments/assets/3d95efd7-cfd5-4c2c-aa78-27817041b11b)
 
 ![image](https://github.com/user-attachments/assets/40e54ae2-d170-48e4-9a3a-7ed590d3b8f8)
