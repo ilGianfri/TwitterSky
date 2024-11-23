@@ -1,5 +1,5 @@
 # TwitterSky
- Move your Tweets to BlueSKy and keep your history alive.
+ Move your Tweets to BlueSky and keep your history alive.
 
 # Parameters
 
@@ -49,7 +49,8 @@ TwitterSky.exe --archivePath "yourtweetarchive\data\tweets.js" --username "yourb
 # How to use
 1. Download your Twitter archive from https://twitter.com/settings/your_twitter_data
 2. Extract the archive
-3. Run TwitterSky with the parameters above
+3. Create an app password from your BlueSky settings
+4. Run TwitterSky from the terminal with the parameters above
 
 # Prerequisites
 You need to have dotnet 9.0 runtime installed. You can download it from https://dotnet.microsoft.com/download/dotnet/9.0
@@ -61,3 +62,16 @@ You need to have dotnet 9.0 runtime installed. You can download it from https://
 
 # Thanks to
 FishyFlip nuget package for the BlueSky API implementation. https://github.com/drasticactions/FishyFlip
+
+# FAQ
+- **Q**: Why do I need to provide my BlueSky username and app password?
+- **A**: BlueSky API requires authentication. You can create an app password from your BlueSky settings. No other action is taken with your credentials other than posting your tweets to BlueSky.
+
+- **Q**: Why do I need to provide my Twitter archive?
+- **A**: TwitterSky needs your tweets to import them to BlueSky.
+
+- **Q**: Why do I need to provide my Twitter handles?
+- **A**: TwitterSky uses them to figure out which tweets are replies to other users and which ones are part of a thread you posted.
+
+- **Q**: Are posts imported with the original date?
+- **A**: Yes, TwitterSky uses the original tweet date from the archive. We pass the date to BlueSky, they decide how to handle it. As of now, BlueSky imports them with the original date but shows an "Archived label" on the post.
