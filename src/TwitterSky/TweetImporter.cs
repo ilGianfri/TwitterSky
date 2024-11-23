@@ -252,7 +252,7 @@ namespace TwitterSky
                 // https://docs.bsky.app/docs/advanced-guides/rate-limits
                 // Absolutely untested code, it won't consider if the user uses the account from other places while importing
                 // It will just wait 15 minutes if the limit is reached but I don't think it's enough
-                if (_postedTweets >= 1665)
+                if (_postedTweets >= 1650)
                 {
                     Console.WriteLine("Rate limit reached. Sleeping for 15 minutes...");
                     await Task.Delay(TimeSpan.FromMinutes(15));

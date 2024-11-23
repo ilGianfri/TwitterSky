@@ -46,6 +46,14 @@ Example:
 TwitterSky.exe --archivePath "yourtweetarchive\data\tweets.js" --username "yourbskyusername.bsky.social" --password "yourapppassword" --twitterHandles "handle1,handle2" --minDate "2012-10-10"
 ```
 
+# How to use
+1. Download your Twitter archive from https://twitter.com/settings/your_twitter_data
+2. Extract the archive
+3. Run TwitterSky with the parameters above
+
+# Prerequisites
+You need to have dotnet 9.0 runtime installed. You can download it from https://dotnet.microsoft.com/download/dotnet/9.0
+
 # Known issues
 - I made this app for myself, I tried to include some useful filters but it may not work for everyone. Code might not be the prettiest.
 - I only tested this with my own tweet archive. If you encounter any issues, open an issue or even better, submit a PR!
