@@ -177,6 +177,46 @@ namespace TwitterSky
         }
 
         /// <summary>
+        /// Gets the hashtags from the tweet content and creates facets for them.
+        /// </summary>
+        /// <param name="tweetContent">The content of the tweet.</param>
+        /// <param name="hashtags">List of hashtags to replace</param>
+        /// <returns>A list of facets</returns>
+        private static List<Facet> GetHashtags(string tweetContent, List<Hashtag>? hashtags)
+        {
+            if (hashtags == null || hashtags.Count == 0)
+            {
+                return [];
+            }
+
+            List<Facet> facets = [];
+            if (hashtags.Count > 0)
+            {
+                foreach (Hashtag hashtag in hashtags)
+                {
+                    FacetIndex index;
+                    if (hashtag.Indices.Count == 2)
+                    {
+                        index = new(Convert.ToInt32(hashtag.Indices[0]), Convert.ToInt32(hashtag.Indices[1]));
+                    }
+                    else
+                    {
+                        // If the indices are not present, we need to find the start and end of the hashtag text.
+                        // This is done as a "ByteSlice."
+                        int promptStart = tweetContent.IndexOf(hashtag.Text, StringComparison.InvariantCulture);
+                        int promptEnd = promptStart + Encoding.Default.GetBytes(hashtag.Text).Length;
+                        index = new(promptStart, promptEnd);
+                    }
+
+                    FacetFeature tag = FacetFeature.CreateHashtag(hashtag.Text);
+                    facets.Add(new Facet(index, tag));
+                }
+            }
+
+            return facets;
+        }
+
+        /// <summary>
         /// Requests the cancellation of the import operation.
         /// </summary>
         public void CancelImport()
@@ -244,7 +284,10 @@ namespace TwitterSky
                     parentPostId = value;
                 }
 
-                await PostToBskyAsync(tweet.Tweet.Id, content, imageUrls, DateTime.ParseExact(tweet.Tweet.CreatedAt, TW_DATE_FORMAT, CultureInfo.InvariantCulture), facets, parentPostId);
+                // Get the hashtags from the tweet content
+                facets.AddRange(GetHashtags(content, tweet.Tweet?.Entities?.Hashtags));
+
+                await PostToBskyAsync(tweet.Tweet!.Id, content, imageUrls, DateTime.ParseExact(tweet.Tweet.CreatedAt, TW_DATE_FORMAT, CultureInfo.InvariantCulture), facets, parentPostId);
 
                 await SaveLastParsedTweet(tweet.Tweet.Id);
 
@@ -271,7 +314,7 @@ namespace TwitterSky
         /// <param name="createdAt">The creation date of the tweet.</param>
         /// <param name="facets">The list of facets for the tweet.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        private async Task PostToBskyAsync(string tweetId, string textContent, List<string> imageUrls, DateTime createdAt, List<Facet> facets, CreatePostResponse inReplyTo)
+        private async Task PostToBskyAsync(string tweetId, string textContent, List<string> imageUrls, DateTime createdAt, List<Facet> facets, CreatePostResponse? inReplyTo)
         {
             Reply? reply = null;
             if (inReplyTo != null)
@@ -309,7 +352,7 @@ namespace TwitterSky
                                // Blob is uploaded.
                                Console.WriteLine($"Uploading image...");
                                // Converts the blob to an image.
-                               FishyFlip.Models.Image? image = success.Blob.ToImage();
+                               Image? image = success.Blob.ToImage();
                                bskyImages.Add(image);
                            },
                            async error =>
@@ -327,7 +370,7 @@ namespace TwitterSky
                 postResult = await _bskyProtocol.Repo.CreatePostAsync(textContent, facets: [.. facets], createdAt: createdAt, reply: reply);
             }
 
-            if (_tweetIdToBskyId.ContainsKey(tweetId) && postResult.Value is CreatePostResponse postResponse)
+            if (_tweetIdToBskyId.ContainsKey(tweetId) && postResult?.Value is CreatePostResponse postResponse)
             {
                 _tweetIdToBskyId[tweetId] = postResponse;
             }

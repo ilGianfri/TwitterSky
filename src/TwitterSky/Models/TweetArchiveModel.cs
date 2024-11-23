@@ -1,5 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 
+#nullable disable
+
 namespace TwitterSky.Models
 {
     public partial class TweetArchiveModel
@@ -15,7 +17,7 @@ namespace TwitterSky.Models
         public bool Retweeted { get; set; }
 
         [JsonPropertyName("entities")]
-        public Entities? Entities { get; set; }
+        public Entities Entities { get; set; }
 
         [JsonPropertyName("id")]
         public string Id { get; set; }
@@ -39,13 +41,22 @@ namespace TwitterSky.Models
     public partial class Entities
     {
         [JsonPropertyName("hashtags")]
-        public List<object> Hashtags { get; set; }
+        public List<Hashtag> Hashtags { get; set; }
 
         [JsonPropertyName("user_mentions")]
         public List<object> UserMentions { get; set; }
 
         [JsonPropertyName("urls")]
         public List<Url> Urls { get; set; }
+    }
+
+    public partial class Hashtag
+    {
+        [JsonPropertyName("text")]
+        public string Text { get; set; }
+
+        [JsonPropertyName("indices")]
+        public List<string> Indices { get; set; }
     }
 
     public partial class ExtendedEntities
