@@ -15,7 +15,6 @@ Please read the known issues and FAQ sections before using this tool.
 # Known issues
 - I made this app for myself, I tried to include some useful filters but it may not work for everyone. Code might not be the prettiest.
 - I only tested this with my own tweet archive. If you encounter any issues, open an issue or even better, submit a PR!
-- Sometimes hashtags are not imported correctly, the highlighting will be off. We use the indexes from the Twitter archive to highlight hashtags.
 - Rate limiting is not handled properly. If you have a lot of tweets, you might get rate limited and it will not be handled gracefully.
 
 This comes with **absolutely no warranty**.
