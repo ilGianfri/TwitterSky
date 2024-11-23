@@ -64,14 +64,22 @@ You need to have dotnet 9.0 runtime installed. You can download it from https://
 FishyFlip nuget package for the BlueSky API implementation. https://github.com/drasticactions/FishyFlip
 
 # FAQ
-- **Q**: Why do I need to provide my BlueSky username and app password?
-- **A**: BlueSky API requires authentication. You can create an app password from your BlueSky settings. No other action is taken with your credentials other than posting your tweets to BlueSky.
+**Q**: Why do I need to provide my BlueSky username and app password?
 
-- **Q**: Why do I need to provide my Twitter archive?
-- **A**: TwitterSky needs your tweets to import them to BlueSky.
+**A**: BlueSky API requires authentication. You can create an app password from your BlueSky settings. No other action is taken with your credentials other than posting your tweets to BlueSky.
 
-- **Q**: Why do I need to provide my Twitter handles?
-- **A**: TwitterSky uses them to figure out which tweets are replies to other users and which ones are part of a thread you posted.
+**Q**: Why do I need to provide my Twitter archive?
 
-- **Q**: Are posts imported with the original date?
-- **A**: Yes, TwitterSky uses the original tweet date from the archive. We pass the date to BlueSky, they decide how to handle it. As of now, BlueSky imports them with the original date but shows an "Archived label" on the post.
+**A**: TwitterSky needs your tweets to import them to BlueSky.
+
+**Q**: Why do I need to provide my Twitter handles?
+
+**A**: TwitterSky uses them to figure out which tweets are replies to other users and which ones are part of a thread you posted.
+
+**Q**: Are posts imported with the original date?
+
+**A**: Yes, TwitterSky uses the original tweet date from the archive. We pass the date to BlueSky, they decide how to handle it. As of now, BlueSky imports them with the original date but shows an "Archived label" on the post.
+
+![image](https://github.com/user-attachments/assets/3d95efd7-cfd5-4c2c-aa78-27817041b11b)
+
+![image](https://github.com/user-attachments/assets/40e54ae2-d170-48e4-9a3a-7ed590d3b8f8)
