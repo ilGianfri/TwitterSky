@@ -5,7 +5,7 @@
 
 ## `archivePath`
 - **Required**: Yes
-- **Description**: Path to the tweet.js file from Twitter.
+- **Description**: Path to the tweet.js file from Twitter archive.
 
 ## `minDate`
 - **Required**: No
