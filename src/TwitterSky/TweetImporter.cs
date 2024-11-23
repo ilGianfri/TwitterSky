@@ -255,10 +255,12 @@ namespace TwitterSky
                 if (_postedTweets >= 1650)
                 {
                     Console.WriteLine("Rate limit reached. Sleeping for 15 minutes...");
-                    await Task.Delay(TimeSpan.FromMinutes(15));
+                    await Task.Delay(TimeSpan.FromMinutes(60));
                     _postedTweets = 0;
                 }
             }
+
+            Console.WriteLine("Import completed.");
         }
 
         /// <summary>
