@@ -53,7 +53,7 @@ jobs:
       working-directory: src
 
     - name: Publish win-x64
-      run: dotnet publish TwitterSky\TwitterSky.csproj --configuration Release -r win-x64 --no-restore --output ./win-x64 /p:Version=${{ steps.remove_v.outputs.next_tag }}
+      run: dotnet publish TwitterSky\TwitterSky.csproj --configuration Release -r win-x64 --no-restore --self-contained --output ./win-x64 /p:Version=${{ steps.remove_v.outputs.next_tag }}
       working-directory: src
 
     - name: Create release directory
@@ -72,7 +72,7 @@ jobs:
       run: Compress-Archive -Path src\win-x64\* -DestinationPath src/release/TwitterSky_win-x64_${{ steps.compute_tag.outputs.next_tag }}.zip
 
     - name: Publish arm-x64
-      run: dotnet publish TwitterSky\TwitterSky.csproj --configuration Release -r win-arm64 --no-restore --output ./win-arm64
+      run: dotnet publish TwitterSky\TwitterSky.csproj --configuration Release -r win-arm64 --no-restore --self-contained --output ./win-arm64 /p:Version=${{ steps.remove_v.outputs.next_tag }}
       working-directory: src
 
     - name: Create Release Packages zip
