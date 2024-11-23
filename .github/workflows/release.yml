@@ -30,6 +30,14 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         version_type: patch
 
+    # Remove the initial v from the tag
+    - name: Remove v from tag
+      id: remove_v
+      run: |
+        $tag = "${{ steps.compute_tag.outputs.next_tag }}"
+        $tag = $tag -replace '^v', ''
+        echo "::set-output name=next_tag::$tag"
+
     # Install the .NET SDK workload
     - name: Install .NET
       uses: actions/setup-dotnet@v4
@@ -45,7 +53,7 @@ jobs:
       working-directory: src
 
     - name: Publish win-x64
-      run: dotnet publish TwitterSky\TwitterSky.csproj --configuration Release -r win-x64 --no-restore --output ./win-x64 /p:Version=${{ steps.compute_tag.outputs.next_tag }}
+      run: dotnet publish TwitterSky\TwitterSky.csproj --configuration Release -r win-x64 --no-restore --output ./win-x64 /p:Version=${{ steps.remove_v.outputs.next_tag }}
       working-directory: src
 
     - name: Create release directory
