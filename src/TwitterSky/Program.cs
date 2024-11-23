@@ -11,7 +11,6 @@ TweetImporter importer = new(options);
 // Handle ctrl + c gracefully
 Console.CancelKeyPress += (sender, eventArgs) =>
 {
-    Console.WriteLine("Import cancelled, finishing up and exiting...");
     importer.CancelImport();
     Environment.Exit(0);
 };

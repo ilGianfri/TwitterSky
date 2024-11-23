@@ -16,6 +16,9 @@ public class Options
     [Option("importReplies", Required = false, HelpText = "Import replies. If false, threads will still be imported", Hidden = true)]
     public bool ImportReplies { get; set; }
 
+    [Option("importThreads", Required = false, HelpText = "Import threads. If false, only the first tweet in a thread will be imported", Default = true)]
+    public bool ImportThreads { get; set; } = true;
+
     [Option("skipSensitive", Required = false, HelpText = "Skip tweets marked as sensitive")]
     public bool SkipSensitive { get; set; }
 
@@ -30,4 +33,10 @@ public class Options
 
     [Option("twitterHandles", Required = true, HelpText = "Comma separated list of Twitter handles you used in the past")]
     public string? TwitterHandles { get; set; }
+
+    [Option("skipWords", Required = false, HelpText = "Comma separated list of words to skip. Tweets containing these words will not be imported")]
+    public string? SkipWords { get; set; }
+
+    [Option('v', "verbose", Required = false, HelpText = "Prints all messages to standard output")]
+    public bool Verbose { get; set; }
 }

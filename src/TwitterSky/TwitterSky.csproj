@@ -12,6 +12,7 @@
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="FishyFlip" Version="2.2.0-alpha.64" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
+    <PackageReference Include="Pastel" Version="6.0.0" />
   </ItemGroup>
 
 </Project>
