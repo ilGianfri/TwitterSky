@@ -212,24 +212,18 @@ namespace TwitterSky
         /// <returns>A tuple containing the updated tweet content and the list of facets.</returns>
         private (string, List<Facet>) ReplaceUrls(string tweetContent, List<Url> urls)
         {
+            if (urls == null || urls.Count == 0)
+            {
+                _cmd.PrintInfo("No URLs to parse.", true);
+                return (tweetContent, []);
+            }
+
             _cmd.PrintInfo("Looking for URLs to replace...", true);
 
             List<Facet> facets = [];
             if (urls.Count > 0)
             {
-                foreach (Url url in urls)
-                {
-                    // Replace url with expanded url
-                    tweetContent = tweetContent.Replace(url.UrlUrl.ToString(), url.ExpandedUrl.ToString());
-
-                    // To insert a link, we need to find the start and end of the link text.
-                    // This is done as a "ByteSlice."
-                    int promptStart = tweetContent.IndexOf(url.ExpandedUrl.ToString(), StringComparison.InvariantCulture);
-                    int promptEnd = promptStart + Encoding.Default.GetBytes(url.ExpandedUrl.ToString()).Length;
-                    FacetIndex index = new(promptStart, promptEnd);
-                    FacetFeature link = FacetFeature.CreateLink(url.ExpandedUrl.ToString());
-                    facets.Add(new Facet(index, link));
-                }
+                facets.AddRange(Facet.ForUris(tweetContent));
 
                 _cmd.PrintInfo($"Replaced {urls.Count} URLs.");
             }
@@ -252,30 +246,8 @@ namespace TwitterSky
             }
 
             List<Facet> facets = [];
-            if (hashtags.Count > 0)
-            {
-                foreach (Hashtag hashtag in hashtags)
-                {
-                    FacetIndex index;
-                    if (hashtag.Indices.Count == 2)
-                    {
-                        index = new(Convert.ToInt32(hashtag.Indices[0]), Convert.ToInt32(hashtag.Indices[1]));
-                    }
-                    else
-                    {
-                        // If the indices are not present, we need to find the start and end of the hashtag text.
-                        // This is done as a "ByteSlice."
-                        int promptStart = tweetContent.IndexOf($"#{hashtag.Text}", StringComparison.InvariantCulture);
-                        int promptEnd = promptStart + Encoding.Default.GetBytes(hashtag.Text).Length;
-                        index = new(promptStart, promptEnd);
-                    }
-
-                    FacetFeature tag = FacetFeature.CreateHashtag(hashtag.Text);
-                    facets.Add(new Facet(index, tag));
-                }
-
-                _cmd.PrintInfo($"Found {hashtags.Count} hashtags.");
-            }
+            _cmd.PrintInfo($"Found {hashtags.Count} hashtags.");
+            facets.AddRange(Facet.ForHashtags(tweetContent));
 
             return facets;
         }
