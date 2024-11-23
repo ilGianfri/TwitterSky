@@ -1,4 +1,5 @@
 ﻿using Pastel;
+using System.Text;
 
 namespace TwitterSky.Utilities
 {
@@ -16,6 +17,8 @@ namespace TwitterSky.Utilities
         public CmdUtil(bool isVerboseEnabled)
         {
             _isVerboseEnabled = isVerboseEnabled;
+
+            Console.OutputEncoding = Encoding.UTF8;
         }
 
         /// <summary>
@@ -27,7 +30,7 @@ namespace TwitterSky.Utilities
         {
             if (!isVerboseOnly || isVerboseOnly && _isVerboseEnabled)
             {
-                Console.WriteLine($"{DateTime.Now:hh:mm} {"warning:\t".Pastel(ConsoleColor.Yellow)}{message}");
+                Console.WriteLine($"{DateTime.Now:hh:mm} {"warning:\t\t".Pastel(ConsoleColor.Yellow)}{message}");
             }
         }
 
@@ -50,7 +53,7 @@ namespace TwitterSky.Utilities
         {
             if (!isVerboseOnly || isVerboseOnly && _isVerboseEnabled)
             {
-                Console.WriteLine($"{DateTime.Now:hh:mm} {"success:\t".Pastel(ConsoleColor.Green)}{message}");
+                Console.WriteLine($"{DateTime.Now:hh:mm} {"success:\t\t".Pastel(ConsoleColor.Green)}{message}");
             }
         }
 

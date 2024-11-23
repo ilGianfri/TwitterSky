@@ -118,6 +118,26 @@ namespace TwitterSky
                         initialCount = _tweetArchive.Count;
                     }
 
+                    // Find tweets that are replies to other tweets in the archive
+                    if (_options.ImportThreads)
+                    {
+                        _cmd.PrintInfo("Finding replies to other tweets in the archive... (threads you posted, no not the meta app, replies to yourself)");
+                        // Find all tweets that are replies to other tweets in the archive
+                        List<TweetArchiveModel> replies = _tweetArchive.Where(x => !string.IsNullOrEmpty(x.Tweet.InReplyToStatusId)).ToList();
+                        foreach (TweetArchiveModel reply in replies)
+                        {
+                            // Find the parent tweet in the archive
+                            TweetArchiveModel? parentTweet = _tweetArchive.FirstOrDefault(x => x.Tweet.Id == reply.Tweet.InReplyToStatusId);
+                            if (parentTweet is not null)
+                            {
+                                // Add the reply to dictionary to keep track of them
+                                _cmd.PrintInfo($"Found reply to tweet {reply.Tweet.InReplyToStatusId} in the archive.", true);
+                                _tweetIdToBskyId.TryAdd(reply.Tweet.Id, null);
+                            }
+                        }
+                        _cmd.PrintInfo($"Found {_tweetIdToBskyId.Count} replies to other tweets in the archive.");
+                    }
+
                     // Filter out replies if the user doesn't want them
                     if (!_options.ImportReplies)
                     {
@@ -128,7 +148,7 @@ namespace TwitterSky
                         // Find all tweets that are not replies or are replies to one of the user's handles
                         _tweetArchive = _tweetArchive.Where(x => string.IsNullOrEmpty(x.Tweet.InReplyToStatusId) // Not a reply
                         //|| _twitterHandles.Any(y => x.Tweet.FullText.StartsWith($"@{y}", StringComparison.OrdinalIgnoreCase)) // Reply to one of the user's handles
-                        || x.Tweet.InReplyToScreenName is null || _twitterHandles.Contains(x.Tweet.InReplyToScreenName)).ToList(); // Reply to one of the user's handles
+                        && (x.Tweet.InReplyToScreenName is null || _twitterHandles.Contains(x.Tweet.InReplyToScreenName))).ToList(); // Reply to one of the user's handles
 
                         _cmd.PrintInfo($"Removed {initialCount - _tweetArchive.Count} replies.");
                         initialCount = _tweetArchive.Count;
@@ -166,29 +186,9 @@ namespace TwitterSky
                     {
                         _cmd.PrintInfo("Removing tweets before the last parsed tweet...", true);
                         // Once we find the last parsed tweet, we need to remove it and all the previous ones
-                        _tweetArchive = _tweetArchive.Where(x => Convert.ToUInt64(x.Tweet.Id) > Convert.ToUInt64(_lastParsedTweetId)).ToList();
+                        _tweetArchive = _tweetArchive.Where(x => Convert.ToUInt64(x.Tweet.Id) > Convert.ToUInt64(_lastParsedTweetId) || _tweetIdToBskyId.ContainsKey(x.Tweet.Id)).ToList();
                         _cmd.PrintInfo($"Removed {initialCount - _tweetArchive.Count} tweets before the last parsed tweet.");
                         initialCount = _tweetArchive.Count;
-                    }
-
-                    // Find tweets that are replies to other tweets in the archive
-                    if (_options.ImportThreads)
-                    {
-                        _cmd.PrintInfo("Finding replies to other tweets in the archive... (threads you posted, no not the meta app, replies to yourself)");
-                        // Find all tweets that are replies to other tweets in the archive
-                        List<TweetArchiveModel> replies = _tweetArchive.Where(x => !string.IsNullOrEmpty(x.Tweet.InReplyToStatusId)).ToList();
-                        foreach (TweetArchiveModel reply in replies)
-                        {
-                            // Find the parent tweet in the archive
-                            TweetArchiveModel? parentTweet = _tweetArchive.FirstOrDefault(x => x.Tweet.Id == reply.Tweet.InReplyToStatusId);
-                            if (parentTweet is not null)
-                            {
-                                // Add the reply to dictionary to keep track of them
-                                _cmd.PrintInfo($"Found reply to tweet {reply.Tweet.InReplyToStatusId} in the archive.", true);
-                                _tweetIdToBskyId.TryAdd(reply.Tweet.Id, null);
-                            }
-                        }
-                        _cmd.PrintInfo($"Found {_tweetIdToBskyId.Count} replies to other tweets in the archive.");
                     }
 
                     if (!string.IsNullOrEmpty(_options.SkipWords))
@@ -265,7 +265,7 @@ namespace TwitterSky
                     {
                         // If the indices are not present, we need to find the start and end of the hashtag text.
                         // This is done as a "ByteSlice."
-                        int promptStart = tweetContent.IndexOf(hashtag.Text, StringComparison.InvariantCulture);
+                        int promptStart = tweetContent.IndexOf($"#{hashtag.Text}", StringComparison.InvariantCulture);
                         int promptEnd = promptStart + Encoding.Default.GetBytes(hashtag.Text).Length;
                         index = new(promptStart, promptEnd);
                     }
