@@ -126,7 +126,9 @@ namespace TwitterSky
                         _twitterHandles = [.. _options.TwitterHandles!.Split(',')];
 
                         // Find all tweets that are not replies or are replies to one of the user's handles
-                        _tweetArchive = _tweetArchive.Where(x => string.IsNullOrEmpty(x.Tweet.InReplyToStatusId) || _twitterHandles.Any(y => x.Tweet.FullText.StartsWith($"@{y}", StringComparison.OrdinalIgnoreCase))).ToList();
+                        _tweetArchive = _tweetArchive.Where(x => string.IsNullOrEmpty(x.Tweet.InReplyToStatusId) // Not a reply
+                        //|| _twitterHandles.Any(y => x.Tweet.FullText.StartsWith($"@{y}", StringComparison.OrdinalIgnoreCase)) // Reply to one of the user's handles
+                        || x.Tweet.InReplyToScreenName is null || _twitterHandles.Contains(x.Tweet.InReplyToScreenName)).ToList(); // Reply to one of the user's handles
 
                         _cmd.PrintInfo($"Removed {initialCount - _tweetArchive.Count} replies.");
                         initialCount = _tweetArchive.Count;
@@ -328,6 +330,8 @@ namespace TwitterSky
                     // If we have facets, we need to add them to the post.
                     facets = x.Item2;
                 }
+
+                //continue;
 
                 List<string> imageUrls = [];
                 // Check if the tweet contains an image

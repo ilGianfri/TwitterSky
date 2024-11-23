@@ -24,6 +24,12 @@ namespace TwitterSky.Models
 
         [JsonPropertyName("in_reply_to_status_id")]
         public string InReplyToStatusId { get; set; }
+        
+        [JsonPropertyName("in_reply_to_user_id")]
+        public string InReplyToUserId { get; set; }
+        
+        [JsonPropertyName("in_reply_to_screen_name")]
+        public string InReplyToScreenName { get; set; }
 
         [JsonPropertyName("possibly_sensitive")]
         public bool PossiblySensitive { get; set; }
