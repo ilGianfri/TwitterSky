@@ -2,7 +2,6 @@
 using FishyFlip.Models;
 using System.Globalization;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Text.Json;
 using TwitterSky.Models;
 using TwitterSky.Utilities;
@@ -40,7 +39,7 @@ namespace TwitterSky
         /// <summary>
         /// Dictionary to map tweet ids to bsky ids (for replies threads)
         /// </summary>
-        private readonly Dictionary<string, CreatePostResponse?> _tweetIdToBskyId = [];
+        private Dictionary<string, CreatePostResponse?>? _tweetIdToBskyId = [];
 
         private readonly Options _options;
         private readonly CmdUtil _cmd;
@@ -56,7 +55,7 @@ namespace TwitterSky
         /// </summary>
         /// <returns>A task that represents the asynchronous operation.</returns>
         /// <exception cref="FileNotFoundException">Thrown when the tweet.js file is not found.</exception>
-        public async Task ParseJson()
+        public async Task ParseJsonAsync()
         {
             await Task.Run(() =>
             {
@@ -122,20 +121,33 @@ namespace TwitterSky
                     if (_options.ImportThreads)
                     {
                         _cmd.PrintInfo("Finding replies to other tweets in the archive... (threads you posted, no not the meta app, replies to yourself)");
-                        // Find all tweets that are replies to other tweets in the archive
-                        List<TweetArchiveModel> replies = _tweetArchive.Where(x => !string.IsNullOrEmpty(x.Tweet.InReplyToStatusId)).ToList();
-                        foreach (TweetArchiveModel reply in replies)
+
+                        if (File.Exists("tweetIdToBskyId.json"))
                         {
-                            // Find the parent tweet in the archive
-                            TweetArchiveModel? parentTweet = _tweetArchive.FirstOrDefault(x => x.Tweet.Id == reply.Tweet.InReplyToStatusId);
-                            if (parentTweet is not null)
-                            {
-                                // Add the reply to dictionary to keep track of them
-                                _cmd.PrintInfo($"Found reply to tweet {reply.Tweet.InReplyToStatusId} in the archive.", true);
-                                _tweetIdToBskyId.TryAdd(reply.Tweet.Id, null);
-                            }
+                            _cmd.PrintInfo("Reading tweetIdToBskyId.json...", true);
+                            _tweetIdToBskyId = JsonSerializer.Deserialize<Dictionary<string, CreatePostResponse?>>(File.ReadAllText("tweetIdToBskyId.json"));
+                            _cmd.PrintInfo($"Found {_tweetIdToBskyId.Count} replies to other tweets in the archive.");
                         }
-                        _cmd.PrintInfo($"Found {_tweetIdToBskyId.Count} replies to other tweets in the archive.");
+                        else
+                        {
+                            // Find all tweets that are replies to other tweets in the archive
+                            List<TweetArchiveModel> replies = _tweetArchive.Where(x => !string.IsNullOrEmpty(x.Tweet.InReplyToStatusId)).ToList();
+                            foreach (TweetArchiveModel reply in replies)
+                            {
+                                // Find the parent tweet in the archive
+                                TweetArchiveModel? parentTweet = _tweetArchive.FirstOrDefault(x => x.Tweet.Id == reply.Tweet.InReplyToStatusId);
+                                if (parentTweet is not null)
+                                {
+                                    // Add the reply to dictionary to keep track of them
+                                    _cmd.PrintInfo($"Found reply to tweet {reply.Tweet.InReplyToStatusId} in the archive.", true);
+                                    _tweetIdToBskyId.TryAdd(reply.Tweet.Id, null);
+                                }
+                            }
+                            _cmd.PrintInfo($"Found {_tweetIdToBskyId.Count} replies to other tweets in the archive.");
+
+                            // Save this dictionary to a file so we can keep track of the replies we posted if we need to resume the import
+                            File.WriteAllText("tweetIdToBskyId.json", JsonSerializer.Serialize(_tweetIdToBskyId));
+                        }
                     }
 
                     // Filter out replies if the user doesn't want them
@@ -172,6 +184,16 @@ namespace TwitterSky
                         initialCount = _tweetArchive.Count;
                     }
 
+                    if (!string.IsNullOrEmpty(_options.SkipWords))
+                    {
+                        _cmd.PrintInfo("Removing tweets containing skip words...", true);
+                        List<string> skipWords = [.. _options.SkipWords.Split(',')];
+
+                        // Remove tweets containing skip words (split by space to avoid partial matches)
+                        _tweetArchive = _tweetArchive.Where(x => !skipWords.Any(y => x.Tweet.FullText.Replace("?", " ").Replace("!", " ").Split(' ', StringSplitOptions.RemoveEmptyEntries).Contains(y, StringComparer.OrdinalIgnoreCase))).ToList();
+                        _cmd.PrintInfo($"Removed {initialCount - _tweetArchive.Count} tweets containing skip words.");
+                    }
+
                     //Read the last parsed tweet id from a file
                     if (File.Exists("lastParsedTweetId.txt"))
                     {
@@ -189,16 +211,6 @@ namespace TwitterSky
                         _tweetArchive = _tweetArchive.Where(x => Convert.ToUInt64(x.Tweet.Id) > Convert.ToUInt64(_lastParsedTweetId) || _tweetIdToBskyId.ContainsKey(x.Tweet.Id)).ToList();
                         _cmd.PrintInfo($"Removed {initialCount - _tweetArchive.Count} tweets before the last parsed tweet.");
                         initialCount = _tweetArchive.Count;
-                    }
-
-                    if (!string.IsNullOrEmpty(_options.SkipWords))
-                    {
-                        _cmd.PrintInfo("Removing tweets containing skip words...", true);
-                        List<string> skipWords = [.. _options.SkipWords.Split(',')];
-
-                        // Remove tweets containing skip words (split by space to avoid partial matches)
-                        _tweetArchive = _tweetArchive.Where(x => !skipWords.Any(y => x.Tweet.FullText.Split(' ', StringSplitOptions.RemoveEmptyEntries).Contains(y, StringComparer.OrdinalIgnoreCase))).ToList();
-                        _cmd.PrintInfo($"Removed {initialCount - _tweetArchive.Count} tweets containing skip words.");
                     }
                 }
             });
@@ -470,6 +482,8 @@ namespace TwitterSky
             if (_lastParsedTweetId != null)
                 await File.WriteAllTextAsync("lastParsedTweetId.txt", _lastParsedTweetId);
 
+            File.WriteAllText("tweetIdToBskyId.json", JsonSerializer.Serialize(_tweetIdToBskyId));
+
             _cmd.PrintInfo($"Last parsed tweet id saved: {_lastParsedTweetId}");
         }
 
@@ -481,14 +495,33 @@ namespace TwitterSky
             // An account may create at most 1,666 records per hour and 11,666 records per day
             // https://docs.bsky.app/docs/advanced-guides/rate-limits
             // Absolutely untested code, it won't consider if the user uses the account from other places while importing
-            // It will just wait 15 minutes if the limit is reached but I don't think it's enough
+            // It will just wait 30 minutes if the limit is reached but I don't think it's enough
 
-            _cmd.PrintWarning("Rate limit reached. Sleeping for 15 minutes...");
-            await Task.Delay(TimeSpan.FromMinutes(15));
+            _cmd.PrintWarning("Rate limit reached. Sleeping for 30 minutes...");
+            await Task.Delay(TimeSpan.FromMinutes(30));
 
             _postedTweets = 0;
 
             _cmd.PrintInfo("Resuming import...");
+        }
+
+        internal async Task AskPostThankYouAsync()
+        {
+            string message = "I've imported my tweets to BlueSky using #TwitterSky! https://github.com/ilGianfri/TwitterSky/";
+
+            _cmd.PrintInfo("Do you want your followers to know you imported your tweets to BlueSky? (Y/N)");
+            _cmd.PrintInfo($"This will post the following message: \"{message}\"");
+
+            string? response = Console.ReadLine();
+
+            if (response.StartsWith("y", StringComparison.OrdinalIgnoreCase))
+            {
+                List<Facet> facets = [];
+                facets.AddRange(Facet.ForHashtags(message));
+                facets.AddRange(Facet.ForUris(message));
+
+                await PostToBskyAsync("0", message, [], DateTime.Now, facets, null);
+            }
         }
     }
 }

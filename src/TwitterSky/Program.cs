@@ -15,5 +15,6 @@ Console.CancelKeyPress += (sender, eventArgs) =>
     Environment.Exit(0);
 };
 
-await importer.ParseJson();
+await importer.ParseJsonAsync();
 await importer.ImportTweetAsync();
+await importer.AskPostThankYouAsync();

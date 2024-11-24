@@ -10,7 +10,9 @@ TwitterSky will import your tweets with the original date and time, at the time 
 Please read the known issues and FAQ sections before using this tool.
 
 # Prerequisites
-~~You need to have dotnet 9.0 runtime installed. You can download it from https://dotnet.microsoft.com/download/dotnet/9.0~~ It's now self-contained, no need to install anything.
+~~You need to have dotnet 9.0 runtime installed. You can download it from https://dotnet.microsoft.com/download/dotnet/9.0~~ 
+
+It's now self-contained, no need to install anything.
 
 # Known issues
 - I made this app for myself, I tried to include some useful filters but it may not work for everyone. Code might not be the prettiest.
@@ -25,6 +27,7 @@ This comes with **absolutely no warranty**.
 2. Extract the archive
 3. Create an app password from your [BlueSky settings](https://bsky.app/settings/app-passwords)
 4. Download and extract the TwitterSky archive
+5. Open the TwitterSky folder and right click -> Open in terminal
 5. Run TwitterSky from the terminal with the parameters below
 
 # Parameters
@@ -45,8 +48,16 @@ This comes with **absolutely no warranty**.
 | `verbose`       | No       | Print verbose output.                                                       | False   |
 
 Example:
+
+Example for **Command Prompt**:
 ```bash
 TwitterSky.exe --archivePath "yourtweetarchive\data\tweets.js" --username "yourbskyusername.bsky.social" --password "yourapppassword" --twitterHandles "handle1,handle2" --minDate "2012-10-10" --skipWords "pizza,hungry,money" --verbose
+```
+
+Example for **PowerShell**:
+
+```powershell
+.\TwitterSky.exe --archivePath "yourtweetarchive\data\tweets.js" --username "yourbskyusername.bsky.social" --password "yourapppassword" --twitterHandles "handle1,handle2" --minDate "2012-10-10" --skipWords "pizza,hungry,money" --verbose
 ```
 
 # Thanks to
@@ -59,7 +70,7 @@ FishyFlip nuget package for the BlueSky API implementation. https://github.com/d
 | Why do I need to provide my BlueSky username and app password? | BlueSky API requires authentication. You can create an app password from your BlueSky settings. No other action is taken with your credentials other than posting your tweets to BlueSky. |
 | Why do I need to provide my Twitter archive? | TwitterSky needs your tweets to import them to BlueSky. |
 | Why do I need to provide my Twitter handles? | TwitterSky uses them to figure out which tweets are replies to other users and which ones are part of a thread you posted. |
-| Are posts imported with the original date? | Yes, TwitterSky uses the original tweet date from the archive. We pass the date to BlueSky, they decide how to handle it. As of now, BlueSky imports them with the original date but shows an "Archived" label on the post. |
+| Are posts imported with the original date? | Yes, TwitterSky uses the original tweet date from the archive. We pass the date to BlueSky, they decide how to handle it. As of now, BlueSky imports them with the original date but shows an "Archived" label on the post. https://bsky.app/profile/bsky.app/post/3lbdnmbcx7s2u |
 
 ### Example of an imported tweet displaying a warning in BlueSky
 ![image](https://github.com/user-attachments/assets/3d95efd7-cfd5-4c2c-aa78-27817041b11b)
