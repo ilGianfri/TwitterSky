@@ -61,7 +61,7 @@ namespace TwitterSky
             {
                 if (!string.IsNullOrEmpty(_options.ArchivePath))
                 {
-                    _cmd.PrintInfo($"Parsing {_options.ArchivePath}", true);
+                    _cmd.PrintInfo($"Parsing Twitter archive at path: {_options.ArchivePath}", true);
 
                     // If we receive a path to the main folder, we need to append /data/tweet.js otherwise we just use the path
                     if (Directory.Exists(_options.ArchivePath))
@@ -80,7 +80,7 @@ namespace TwitterSky
 
                     string json = File.ReadAllText(_options.ArchivePath);
 
-                    _cmd.PrintInfo("Parsing JSON...", true);
+                    _cmd.PrintInfo("Parsing Twitter archive JSON...", true);
 
                     // Remove the window.YTD.tweets.part0 = at the beginning of the file
                     int start = json.IndexOf('[');
@@ -90,7 +90,7 @@ namespace TwitterSky
 
                     if (_tweetArchive is null)
                     {
-                        _cmd.PrintError("Failed to parse JSON.");
+                        _cmd.PrintError("Failed to parse JSON. Please make sure you're passing to the correct file. If you're unsure, pass as path the root folder of your unpacked Twitter archive.");
                         return;
                     }
 
@@ -108,6 +108,8 @@ namespace TwitterSky
                         _cmd.PrintInfo($"Removed {initialCount - _tweetArchive.Count} tweets before {_options.MinDate}.");
                         initialCount = _tweetArchive.Count;
                     }
+                    else
+                        _cmd.PrintWarning("No min date specified.", true);
 
                     if (!string.IsNullOrEmpty(_options.MaxDate))
                     {
@@ -116,10 +118,14 @@ namespace TwitterSky
                         _cmd.PrintInfo($"Removed {initialCount - _tweetArchive.Count} tweets after {_options.MaxDate}.");
                         initialCount = _tweetArchive.Count;
                     }
+                    else
+                        _cmd.PrintWarning("No max date specified.", true);
 
                     // Find tweets that are replies to other tweets in the archive
                     if (_options.ImportThreads)
                     {
+                        _cmd.PrintWarning("Threads import has been enabled.", true);
+
                         _cmd.PrintInfo("Finding replies to other tweets in the archive... (threads you posted, no not the meta app, replies to yourself)");
 
                         if (File.Exists("tweetIdToBskyId.json"))
@@ -149,6 +155,8 @@ namespace TwitterSky
                             File.WriteAllText("tweetIdToBskyId.json", JsonSerializer.Serialize(_tweetIdToBskyId));
                         }
                     }
+                    else
+                        _cmd.PrintWarning("Threads import has been disabled.", true);
 
                     // Filter out replies if the user doesn't want them
                     if (!_options.ImportReplies)
@@ -165,34 +173,48 @@ namespace TwitterSky
                         _cmd.PrintInfo($"Removed {initialCount - _tweetArchive.Count} replies.");
                         initialCount = _tweetArchive.Count;
                     }
+                    else
+                        _cmd.PrintWarning("Importing replies has been enabled.", true);
 
                     // Filter out sensitive tweets if the user doesn't want them
                     if (_options.SkipSensitive)
                     {
+                        _cmd.PrintWarning("Skipping sensitive tweets is enabled.", true);
+
                         _cmd.PrintInfo("Skipping sensitive tweets.", true);
                         _tweetArchive = _tweetArchive.Where(x => !x.Tweet.PossiblySensitive).ToList();
                         _cmd.PrintInfo($"Removed {initialCount - _tweetArchive.Count} sensitive tweets.");
                         initialCount = _tweetArchive.Count;
                     }
+                    else
+                        _cmd.PrintWarning("Skipping sensitive tweets is disabled.", true);
 
                     // Filter out retweets if the user doesn't want them
                     if (_options.SkipRetweets)
                     {
+                        _cmd.PrintWarning("Skipping retweets is enabled.", true);
+
                         _cmd.PrintInfo("Skipping retweets.", true);
                         _tweetArchive = _tweetArchive.Where(x => !x.Tweet.FullText.StartsWith("RT @")).ToList();
                         _cmd.PrintInfo($"Removed {initialCount - _tweetArchive.Count} retweets.");
                         initialCount = _tweetArchive.Count;
                     }
+                    else
+                        _cmd.PrintWarning("Skipping retweets is disabled.", true);
 
                     if (!string.IsNullOrEmpty(_options.SkipWords))
                     {
                         _cmd.PrintInfo("Removing tweets containing skip words...", true);
                         List<string> skipWords = [.. _options.SkipWords.Split(',')];
 
+                        _cmd.PrintWarning($"Skip warning enabled. {skipWords.Count} words have been specified.");
+
                         // Remove tweets containing skip words (split by space to avoid partial matches)
                         _tweetArchive = _tweetArchive.Where(x => !skipWords.Any(y => x.Tweet.FullText.Replace("?", " ").Replace("!", " ").Split(' ', StringSplitOptions.RemoveEmptyEntries).Contains(y, StringComparer.OrdinalIgnoreCase))).ToList();
                         _cmd.PrintInfo($"Removed {initialCount - _tweetArchive.Count} tweets containing skip words.");
                     }
+                    else
+                        _cmd.PrintWarning("No skip words specified.", true);
 
                     //Read the last parsed tweet id from a file
                     if (File.Exists("lastParsedTweetId.txt"))
@@ -466,6 +488,8 @@ namespace TwitterSky
 
             // Increment the number of posted tweets
             _postedTweets++;
+
+            await Task.Delay(1000);
         }
 
         /// <summary>

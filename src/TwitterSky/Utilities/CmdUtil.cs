@@ -30,7 +30,7 @@ namespace TwitterSky.Utilities
         {
             if (!isVerboseOnly || isVerboseOnly && _isVerboseEnabled)
             {
-                Console.WriteLine($"{DateTime.Now:hh:mm} {"warning:\t\t".Pastel(ConsoleColor.Yellow)}{message}");
+                Console.WriteLine($"[{DateTime.Now:hh:mm:ss}] [{"  Warning  ".Pastel(ConsoleColor.Yellow)}] {message}");
             }
         }
 
@@ -41,7 +41,7 @@ namespace TwitterSky.Utilities
         /// <param name="isVerboseOnly">If set to <c>true</c>, the message will only be printed if verbose mode is enabled.</param>
         public void PrintError(string message)
         {
-            Console.WriteLine($"{DateTime.Now:hh:mm} {"error:\t\t".Pastel(ConsoleColor.Red)}{message}");
+            Console.WriteLine($"[{DateTime.Now:hh:mm:ss}] [{"   Error   ".Pastel(ConsoleColor.Red)}] {message}");
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace TwitterSky.Utilities
         {
             if (!isVerboseOnly || isVerboseOnly && _isVerboseEnabled)
             {
-                Console.WriteLine($"{DateTime.Now:hh:mm} {"success:\t\t".Pastel(ConsoleColor.Green)}{message}");
+                Console.WriteLine($"[{DateTime.Now:hh:mm:ss}] [{"  Success  ".Pastel(ConsoleColor.Green)}] {message}");
             }
         }
 
@@ -66,7 +66,7 @@ namespace TwitterSky.Utilities
         {
             if (!isVerboseOnly || isVerboseOnly && _isVerboseEnabled)
             {
-                Console.WriteLine($"{DateTime.Now:hh:mm} {"info:\t\t".Pastel(ConsoleColor.Cyan)}{message}");
+                Console.WriteLine($"[{DateTime.Now:hh:mm:ss}] [{"Information".Pastel(ConsoleColor.Cyan)}] {message}");
             }
         }
     }
