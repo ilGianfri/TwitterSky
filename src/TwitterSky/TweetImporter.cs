@@ -223,6 +223,12 @@ namespace TwitterSky
             List<Facet> facets = [];
             if (urls.Count > 0)
             {
+                foreach (Url url in urls)
+                {
+                    // Replace url with expanded url
+                    tweetContent = tweetContent.Replace(url.UrlUrl.ToString(), url.ExpandedUrl.ToString());
+                }
+
                 facets.AddRange(Facet.ForUris(tweetContent));
 
                 _cmd.PrintInfo($"Replaced {urls.Count} URLs.");
@@ -416,14 +422,14 @@ namespace TwitterSky
                     // Create a post with the images
                     postResult = await _bskyProtocol.Repo.CreatePostAsync(textContent, facets: [.. facets], createdAt: createdAt, reply: reply, embed: new ImagesEmbed(bskyImages.Select(x => new ImageEmbed(x, "")).ToArray()));
 
-                    _cmd.PrintInfo($"{createdAt.ToShortDateString()}: {textContent} with {imageUrls.Count} images");
+                    _cmd.PrintSuccess($"{createdAt.ToShortDateString()}: {textContent} with {imageUrls.Count} images");
                 }
             }
             else
             {
                 postResult = await _bskyProtocol.Repo.CreatePostAsync(textContent, facets: [.. facets], createdAt: createdAt, reply: reply);
 
-                _cmd.PrintInfo($"{createdAt.ToShortDateString()}: {textContent}");
+                _cmd.PrintSuccess($"{createdAt.ToShortDateString()}: {textContent}");
             }
 
             if (postResult?.Value is ATError error)
